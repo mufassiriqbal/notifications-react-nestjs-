@@ -1,7 +1,12 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
+import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { User, UserDocument } from './schemas/user.schema';
 
@@ -30,6 +35,24 @@ export class UsersService {
     const savedUser = await user.save();
     const { password: _password, ...userWithoutPassword } =
       savedUser.toObject();
+
+    return userWithoutPassword;
+  }
+
+  async login(dto: LoginDto): Promise<Omit<User, 'password'>> {
+    const invalidCredentials = new UnauthorizedException(
+      'Invalid username or password',
+    );
+    const user = await this.userModel
+      .findOne({ username: dto.username })
+      .select('+password')
+      .exec();
+
+    if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+      throw invalidCredentials;
+    }
+
+    const { password: _password, ...userWithoutPassword } = user.toObject();
 
     return userWithoutPassword;
   }
