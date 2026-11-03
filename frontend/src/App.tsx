@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import ProtectedRoute from './components/ProtectedRoute'
 import DashboardPage from './pages/DashboardPage'
 import EditNotificationPage from './pages/EditNotificationPage'
 import LoginPage from './pages/LoginPage'
@@ -12,14 +13,29 @@ function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/notifications/new"
-          element={<NewNotificationPage />}
+          element={
+            <ProtectedRoute>
+              <NewNotificationPage />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/notifications/:id"
-          element={<EditNotificationPage />}
+          element={
+            <ProtectedRoute>
+              <EditNotificationPage />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </BrowserRouter>
