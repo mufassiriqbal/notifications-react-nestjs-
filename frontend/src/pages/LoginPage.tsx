@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { isAxiosError } from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import authService from '../services/authService'
 
 function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { login } = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -15,6 +16,8 @@ function LoginPage() {
   })
   const [serverError, setServerError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const successMessage = (location.state as { successMessage?: string } | null)
+    ?.successMessage
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -58,6 +61,11 @@ function LoginPage() {
       <div className="row justify-content-center">
         <div className="col-12 col-md-6 col-lg-4">
           <h1 className="h2 mb-4">Login</h1>
+          {successMessage && (
+            <div className="alert alert-success" role="alert">
+              {successMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit} noValidate>
             <div className="mb-3 text-start">
               <label htmlFor="username" className="form-label">
