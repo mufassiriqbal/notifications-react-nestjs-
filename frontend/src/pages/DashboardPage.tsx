@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { useNotifications } from '../context/useNotifications'
+import NotificationBanner from '../components/NotificationBanner'
 import notificationService from '../services/notificationService'
 import type { Notification } from '../types/notification'
 
@@ -50,6 +51,22 @@ function DashboardPage() {
     }
   }
 
+  const handleClose = useCallback(
+    async (id: string) => {
+      setError('')
+
+      try {
+        await notificationService.update(id, { isClosed: true })
+        setNotifications((current) =>
+          current.filter((notification) => notification._id !== id),
+        )
+      } catch {
+        setError('Unable to close notification. Please try again.')
+      }
+    },
+    [setNotifications],
+  )
+
   function categoryBadgeClass(category: Notification['category']) {
     if (category === 'ERROR') {
       return 'text-bg-danger'
@@ -78,6 +95,27 @@ function DashboardPage() {
 
       {isLoading && <p>Loading notifications...</p>}
       {error && <div className="alert alert-danger">{error}</div>}
+      {!isLoading && (
+        <div className="mb-4">
+          {notifications
+            .filter((notification) => !notification.isClosed)
+            .sort((a, b) => b.date - a.date)
+            .slice(0, 5)
+            .map((notification) => (
+              <NotificationBanner
+                key={notification._id}
+                notification={notification}
+                onClose={handleClose}
+              />
+            ))}
+          {notifications.filter((notification) => !notification.isClosed).length >
+            5 && (
+            <div className="alert alert-info" role="alert">
+              You have more notifications
+            </div>
+          )}
+        </div>
+      )}
       {!isLoading && !error && notifications.length === 0 && (
         <p>No notifications found.</p>
       )}

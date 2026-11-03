@@ -1,9 +1,9 @@
-import { createContext } from 'react'
+import { createContext, type Dispatch, type SetStateAction } from 'react'
 import type { Notification } from '../types/notification'
 
 interface NotificationContextValue {
   notifications: Notification[]
-  setNotifications: (notifications: Notification[]) => void
+  setNotifications: Dispatch<SetStateAction<Notification[]>>
   addNotification: (notification: Notification) => void
 }
 
