@@ -30,7 +30,11 @@ export class Notification {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   userId: Types.ObjectId;
 
-  @Prop({ type: Number, required: true, default: Date.now })
+  @Prop({
+    type: Number,
+    required: true,
+    default: () => Math.floor(Date.now() / 1000),
+  })
   date: number;
 }
 
