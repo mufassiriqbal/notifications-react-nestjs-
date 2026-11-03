@@ -56,9 +56,15 @@ function DashboardPage() {
       setError('')
 
       try {
-        await notificationService.update(id, { isClosed: true })
+        const updatedNotification = await notificationService.update(id, {
+          isClosed: true,
+        })
         setNotifications((current) =>
-          current.filter((notification) => notification._id !== id),
+          current.map((notification) =>
+            notification._id === updatedNotification._id
+              ? updatedNotification
+              : notification,
+          ),
         )
       } catch {
         setError('Unable to close notification. Please try again.')
