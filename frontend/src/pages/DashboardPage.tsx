@@ -11,6 +11,7 @@ function DashboardPage() {
   const { notifications, setNotifications } = useNotifications()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadNotifications() {
@@ -31,6 +32,22 @@ function DashboardPage() {
   function handleLogout() {
     logout()
     navigate('/login')
+  }
+
+  async function handleDelete(id: string) {
+    setError('')
+    setDeletingId(id)
+
+    try {
+      await notificationService.remove(id)
+      setNotifications(
+        notifications.filter((notification) => notification._id !== id),
+      )
+    } catch {
+      setError('Unable to delete notification. Please try again.')
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   function categoryBadgeClass(category: Notification['category']) {
@@ -67,21 +84,39 @@ function DashboardPage() {
       {!isLoading && !error && notifications.length > 0 && (
         <div className="list-group text-start">
           {notifications.map((notification) => (
-            <Link
+            <div
               key={notification._id}
-              to={`/notifications/${notification._id}`}
-              className="list-group-item list-group-item-action"
+              className="list-group-item"
             >
               <div className="d-flex justify-content-between align-items-start gap-3">
-                <div>
+                <Link
+                  to={`/notifications/${notification._id}`}
+                  className="text-decoration-none text-reset flex-grow-1"
+                >
                   <h2 className="h5 mb-1">{notification.header}</h2>
                   <p className="mb-0">{notification.body}</p>
+                </Link>
+                <div className="d-flex align-items-center gap-2">
+                  <span className={`badge ${categoryBadgeClass(notification.category)}`}>
+                    {notification.category}
+                  </span>
+                  <Link
+                    to={`/notifications/${notification._id}`}
+                    className="btn btn-sm btn-outline-primary"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-danger"
+                    onClick={() => void handleDelete(notification._id)}
+                    disabled={deletingId === notification._id}
+                  >
+                    {deletingId === notification._id ? 'Deleting...' : 'Delete'}
+                  </button>
                 </div>
-                <span className={`badge ${categoryBadgeClass(notification.category)}`}>
-                  {notification.category}
-                </span>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

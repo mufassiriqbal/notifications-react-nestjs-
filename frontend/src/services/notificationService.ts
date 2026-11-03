@@ -16,6 +16,12 @@ const notificationService = {
     return response.data
   },
 
+  async getOne(id: string): Promise<Notification> {
+    const response = await api.get<Notification>(`/notifications/${id}`)
+
+    return response.data
+  },
+
   async create(data: NotificationData): Promise<Notification> {
     const response = await api.post<Notification>('/notifications', data)
 
