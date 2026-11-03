@@ -44,7 +44,9 @@ export class NotificationsService {
 
   async update(userId: string, id: string, dto: UpdateNotificationDto) {
     const notification = await this.notificationModel
-      .findOneAndUpdate({ _id: id, userId }, dto, { new: true })
+      .findOneAndUpdate({ _id: id, userId }, dto, {
+        returnDocument: 'after',
+      })
       .exec();
 
     if (!notification) {
