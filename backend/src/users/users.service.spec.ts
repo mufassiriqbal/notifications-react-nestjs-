@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
+import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { User } from './schemas/user.schema';
 
@@ -13,6 +14,10 @@ describe('UsersService', () => {
         {
           provide: getModelToken(User.name),
           useValue: {},
+        },
+        {
+          provide: JwtService,
+          useValue: { sign: jest.fn() },
         },
       ],
     }).compile();

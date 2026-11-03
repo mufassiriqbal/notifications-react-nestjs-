@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { LoginDto } from './dto/login.dto';
@@ -15,6 +16,7 @@ export class UsersService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async register(dto: RegisterDto): Promise<Omit<User, 'password'>> {
@@ -39,7 +41,9 @@ export class UsersService {
     return userWithoutPassword;
   }
 
-  async login(dto: LoginDto): Promise<Omit<User, 'password'>> {
+  async login(
+    dto: LoginDto,
+  ): Promise<{ accessToken: string; user: Omit<User, 'password'> }> {
     const invalidCredentials = new UnauthorizedException(
       'Invalid username or password',
     );
@@ -53,7 +57,11 @@ export class UsersService {
     }
 
     const { password: _password, ...userWithoutPassword } = user.toObject();
+    const accessToken = this.jwtService.sign({
+      sub: user._id.toString(),
+      username: user.username,
+    });
 
-    return userWithoutPassword;
+    return { accessToken, user: userWithoutPassword };
   }
 }
